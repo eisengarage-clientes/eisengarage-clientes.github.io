@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="referrer" content="no-referrer">
+<meta name="robots" content="noindex, nofollow">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'unsafe-inline'; style-src 'unsafe-inline'; connect-src https://script.google.com https://script.googleusercontent.com; img-src 'self' data:; base-uri 'none'; form-action 'none'">
+<title>Historial del vehículo · Eisen Garage</title>
+<style>
+:root{--asfalto:#1F2A30;--acero:#5B6B73;--concreto:#EEF1F2;--linea:#D5DBDE;--chapa:#FFFFFF;--senal:#E8A317;--senal-osc:#8A5A00}
+*{box-sizing:border-box}
+body{margin:0;background:var(--concreto);color:var(--asfalto);font:16px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+header{background:var(--asfalto);color:#fff;padding:14px 16px;border-bottom:4px solid var(--senal)}
+header .in,main{max-width:680px;margin:0 auto}
+header b{font-size:18px;letter-spacing:.02em}
+header span{display:block;font-size:13px;opacity:.75}
+main{padding:16px}
+.card{background:var(--chapa);border:1px solid var(--linea);border-radius:10px;padding:16px;margin-bottom:12px}
+.veh{display:flex;gap:14px;align-items:center;flex-wrap:wrap}
+.plate{display:inline-flex;flex-direction:column;align-items:center;background:#fff;border:2px solid var(--asfalto);border-radius:5px;padding:2px 12px 4px;min-width:120px}
+.plate small{font-size:8px;letter-spacing:.3em;color:var(--acero)}
+.plate b{font-size:28px;line-height:1;letter-spacing:.05em}
+h1{font-size:22px;margin:0}
+h2{font-size:17px;margin:20px 0 10px}
+.muted{color:var(--acero);font-size:14px}
+.trab .meta{font-weight:600;margin-bottom:6px}
+.trab .meta span{color:var(--acero);font-weight:400}
+.trab pre{margin:0;white-space:pre-wrap;word-wrap:break-word;font:inherit}
+.estado{text-align:center;padding:40px 16px}
+footer{max-width:680px;margin:0 auto;padding:8px 16px 32px;font-size:13px;color:var(--acero)}
+footer a{color:var(--asfalto)}
+</style>
+</head>
+<body>
+<header><div class="in"><b>EISEN GARAGE</b><span>Historial técnico del vehículo</span></div></header>
+<main id="main"><div class="card estado" id="estado">Cargando…</div></main>
+<footer>
+  <p><b>Tus datos.</b> Este historial lo publica Eisen Garage SpA (RUT 78.417.312-7, Gulutren 022, Peumo) con autorización del propietario del vehículo. No contiene nombre, teléfono ni montos. Se guarda en servicios de Google (EE.UU.). Para pedir que se corrija o se retire, escribe a <a href="mailto:eisengarage@gmail.com">eisengarage@gmail.com</a>. <a href="../privacidad/">Política de privacidad</a>.</p>
+  <p>Guarda este enlace para consultarlo cuando quieras; siempre muestra la última versión publicada.</p>
+</footer>
+<script>
+(function(){
+  var API = 'https://script.google.com/macros/s/AKfycbxZSDP-rB5jECMlGl3XE2CkAd1HjTaFQ_96jrI3FLhNUfJZ_UNa1u6WWPiVKfsQmlI/exec';
+  function esc(s){ return String(s == null ? '' : s).replace(/[&<>"']/g, function(c){ return { '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]; }); }
+  function fecha(iso){ var m = /^(\d{4})-(\d{2})-(\d{2})/.exec(String(iso || '')); if (!m) return ''; var mes = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'][+m[2] - 1]; return (+m[3]) + ' ' + mes + ' ' + m[1]; }
+  function km(n){ return n == null || n === '' ? '' : Number(n).toLocaleString('es-CL') + ' km'; }
+  function estado(t){ document.getElementById('main').innerHTML = '<div class="card estado">' + t + '</div>'; }
+  var k = (/[#&]k=([0-9a-f]{64})/.exec(location.hash) || [])[1];
+  if (!k) { estado('Este enlace está incompleto. Ábrelo tal como te llegó o pide uno nuevo a Eisen Garage.'); return; }
+  fetch(API, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ accion: 'historial', k: k }), credentials: 'omit', referrerPolicy: 'no-referrer' })
+    .then(function(r){ return r.json(); })
+    .then(function(r){
+      if (!r.ok) { estado(esc(r.error && r.error.message || 'Este enlace no está disponible.')); return; }
+      var d = r.data, v = d.vehiculo || {};
+      var titulo = [v.marca, v.modelo, v.anio].filter(Boolean).join(' ') || v.nombre || 'Vehículo';
+      var h = '<div class="card veh">' + (v.patente ? '<span class="plate"><small>CHILE</small><b>' + esc(String(v.patente).toUpperCase()) + '</b></span>' : '') +
+        '<div><h1>' + esc(titulo) + '</h1><div class="muted">' + (d.trabajos || []).length + ' trabajo' + ((d.trabajos || []).length === 1 ? '' : 's') + ' registrado' + ((d.trabajos || []).length === 1 ? '' : 's') + (d.actualizado ? ' · actualizado el ' + esc(fecha(d.actualizado)) : '') + '</div></div></div>';
+      h += '<h2>Trabajos realizados</h2>';
+      (d.trabajos || []).forEach(function(t){
+        h += '<div class="card trab"><div class="meta">' + esc(fecha(t.fecha)) + (t.tipo ? ' · ' + esc(t.tipo) : '') + (t.km ? ' <span>· ' + esc(km(t.km)) + '</span>' : '') + (t.horas ? ' <span>· ' + esc(t.horas) + ' h</span>' : '') + '</div><pre>' + esc(t.resumen) + '</pre></div>';
+      });
+      var tl = d.taller || {};
+      h += '<p class="muted">' + esc(tl.nombre || 'Eisen Garage SpA') + (tl.direccion ? ' · ' + esc(tl.direccion) : '') + '</p>';
+      document.getElementById('main').innerHTML = h;
+    })
+    .catch(function(){ estado('No se pudo cargar el historial. Revisa tu conexión e intenta de nuevo.'); });
+})();
+</script>
+</body>
+</html>
