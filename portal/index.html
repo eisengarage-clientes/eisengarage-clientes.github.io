@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="referrer" content="no-referrer">
+<meta name="robots" content="noindex, nofollow">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; connect-src https://script.google.com https://script.googleusercontent.com; img-src 'self' data:; base-uri 'none'; form-action 'none'">
+<title>Mi portal · Eisen Garage</title>
+<link rel="stylesheet" href="../eg.css">
+</head>
+<body>
+<header><div class="in"><b>EISEN GARAGE</b><span>Portal del cliente</span></div></header>
+<main id="main"><div class="card estado">Cargando…</div></main>
+<footer>
+  <p><b>Tus datos.</b> Este portal lo publica Eisen Garage SpA (RUT 78.417.312-7, Gulutren 022, Peumo) solo para ti: no lo reenvíes. Se guarda en servicios de Google (EE.UU.). Para corregir o retirar algo, escribe a <a href="mailto:eisengarage@gmail.com">eisengarage@gmail.com</a>. <a href="../privacidad/">Política de privacidad</a>.</p>
+  <p>Guarda este enlace: siempre muestra lo último que publicamos.</p>
+</footer>
+<script src="../eg.js"></script>
+<script>
+(function(){
+  var main = document.getElementById('main'), k = EG.codigo(), E = EG.esc;
+  if (!k) { EG.estado(main, 'Este enlace está incompleto. Ábrelo tal como te llegó o pide uno nuevo a Eisen Garage.'); return; }
+  EG.post({ accion: 'portal', k: k }).then(function(r){
+    if (!r.ok) { EG.estado(main, E(r.error && r.error.message || 'Este enlace no está disponible.')); return; }
+    var d = r.data, eqs = d.equipos || [], hist = d.historiales || {}, pss = d.presupuestos || [];
+    var h = '<div class="card"><h1>Hola' + (d.cliente && d.cliente.nombre ? ', ' + E(d.cliente.nombre) : '') + '</h1><p class="muted" style="margin:4px 0 0">Aquí ves tus vehículos, presupuestos' + (d.cuenta ? ', tu estado de cuenta' : '') + (d.solicitar ? ' y puedes pedirnos un trabajo' : '') + '.' + (d.actualizado ? ' Actualizado el ' + E(EG.fecha(d.actualizado)) + '.' : '') + '</p></div>';
+    var abiertos = pss.filter(function(p){ return p.puede_responder; });
+    if (pss.length) {
+      h += '<div class="sec">Presupuestos' + (abiertos.length ? ' · ' + abiertos.length + ' por responder' : '') + '</div>';
+      pss.forEach(function(p, i){
+        var chip = p.puede_responder ? '<span class="chip warn">Por responder</span>' : p.estado === 'Autorizado' ? '<span class="chip ok">Autorizado</span>' : p.vencido ? '<span class="chip">Vencido</span>' : '<span class="chip">' + E(p.estado) + '</span>';
+        h += '<details' + (p.puede_responder && pss.length === 1 ? ' open' : '') + '><summary><b>' + E(p.codigo) + '</b> ' + E(p.titulo) + ' ' + chip + ' <span class="muted">' + EG.pesos(((p.totales || {}).necesario || {}).total) + '</span></summary><div class="in" id="psw' + i + '">' + EG.presupuestoHtml(p, k, i) + '</div></details>';
+      });
+    }
+    if (d.solicitar) {
+      h += '<div class="sec">Pedir un trabajo</div><form class="card" id="sol"><p class="muted" style="margin-top:0">Cuéntanos qué necesitas y te contactamos.</p>' +
+        (eqs.length ? '<div class="f"><span>¿Para qué vehículo o equipo?</span>' + eqs.map(function(e){ return '<label class="chk"><input type="checkbox" name="eq" value="' + E(e.id) + '"> ' + E(e.nombre) + (e.patente ? ' · ' + E(String(e.patente).toUpperCase()) : '') + '</label>'; }).join('') + '</div>' : '') +
+        '<label class="f"><span>Otro vehículo (si no está en la lista)</span><input name="vehiculo" maxlength="120" placeholder="Ej. Toyota Hilux ABCD12"></label>' +
+        '<label class="f"><span>¿Qué necesitas? *</span><select name="tipo"><option value="">Elegir…</option><option>Mantención</option><option>Falla</option><option>Diagnóstico</option><option>Presupuesto</option><option>Otro</option></select></label>' +
+        '<label class="f"><span>Cuéntanos *</span><textarea name="mensaje" maxlength="1000" rows="4" placeholder="Qué pasa, desde cuándo, km u horas, dónde está el equipo"></textarea></label>' +
+        '<label class="f"><span>Quién lo pide (opcional)</span><input name="nombre" maxlength="80" autocomplete="name"></label>' +
+        '<label class="f"><span>Teléfono de contacto (opcional)</span><input name="telefono" maxlength="20" inputmode="tel" autocomplete="tel"></label>' +
+        '<button class="btn go" type="submit">Enviar solicitud</button><div class="msg" role="status"></div></form>';
+    }
+    if (eqs.length) {
+      h += '<div class="sec">Tus vehículos y equipos</div>';
+      eqs.forEach(function(e){
+        var hh = hist[e.id], n = hh ? (hh.trabajos || []).length : 0, titulo = [e.marca, e.modelo, e.anio].filter(Boolean).join(' ') || e.nombre;
+        h += n ? '<details><summary>' + EG.patente(e.patente) + '<span><b>' + E(e.nombre || titulo) + '</b><br><span class="muted">' + n + ' trabajo' + (n === 1 ? '' : 's') + ' en el historial</span></span></summary><div class="in">' + EG.historialHtml(hh) + '</div></details>'
+          : '<div class="card veh">' + EG.patente(e.patente) + '<div><b>' + E(e.nombre || titulo) + '</b><div class="muted">Sin historial publicado.</div></div></div>';
+      });
+    }
+    if (d.cuenta) h += '<div class="sec">Estado de cuenta</div>' + EG.cuentaHtml(d.cuenta);
+    main.innerHTML = h;
+    pss.forEach(function(p, i){ EG.activarPresupuesto(document.getElementById('psw' + i), p, k, i, { presupuesto_id: p.id }); });
+    var f = document.getElementById('sol');
+    if (f) {
+      var clave = EG.clave();
+      f.addEventListener('submit', function(ev){
+        ev.preventDefault();
+        var msg = f.querySelector('.msg'), btn = f.querySelector('button');
+        var eqsSel = Array.prototype.map.call(f.querySelectorAll('input[name=eq]:checked'), function(c){ return c.value; });
+        if (!f.tipo.value) { msg.textContent = 'Elige qué necesitas.'; return; }
+        if (f.mensaje.value.trim().length < 3) { msg.textContent = 'Cuéntanos qué necesitas.'; return; }
+        if (!eqsSel.length && !f.vehiculo.value.trim()) { msg.textContent = 'Elige el vehículo o escribe cuál es.'; return; }
+        btn.disabled = true; msg.textContent = 'Enviando…';
+        EG.post({ accion: 'solicitar', k: k, tipo: f.tipo.value, equipos: eqsSel, vehiculo: f.vehiculo.value.trim(), mensaje: f.mensaje.value.trim(), nombre: f.nombre.value.trim(), telefono: f.telefono.value.trim(), clave: clave }).then(function(res){
+          if (res.ok) f.innerHTML = '<div class="aviso ok">¡Listo! Recibimos tu solicitud. Te contactaremos pronto.</div>';
+          else { btn.disabled = false; msg.textContent = (res.error && res.error.message) || 'No se pudo enviar.'; }
+        });
+      });
+    }
+  });
+})();
+</script>
+</body>
+</html>
