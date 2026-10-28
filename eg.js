@@ -43,7 +43,8 @@
     var t = p.taller || {}, v = p.vehiculo, iva = p.iva_pct || 19, pre = 'ps' + idx;
     var nec = (p.items || []).filter(function (x) { return !x.opcional; }), opc = (p.items || []).filter(function (x) { return x.opcional; });
     var fila = function (x, chk) {
-      return '<tr><td>' + (chk ? '<label class="opc"><input type="checkbox" class="' + pre + '-opc" value="' + EG.esc(x.id) + '" data-t="' + Number(x.total) + '"> ' : '') + EG.esc(x.descripcion) + (chk ? '</label>' : '') + '</td><td class="n">' + EG.esc(EG.num(x.cantidad)) + (x.unidad ? ' ' + EG.esc(x.unidad) : '') + '</td><td class="n">' + EG.pesos(x.precio_unitario) + '</td><td class="n">' + EG.pesos(x.total) + '</td></tr>';
+      var marca = x.aceptado === true ? ' <span class="chip ok">Incluido</span>' : x.aceptado === false ? ' <span class="chip">No incluido</span>' : '';
+      return '<tr><td>' + (chk ? '<label class="opc"><input type="checkbox" class="' + pre + '-opc" value="' + EG.esc(x.id) + '" data-t="' + Number(x.total) + '"> ' : '') + EG.esc(x.descripcion) + (chk ? '</label>' : '') + marca + '</td><td class="n">' + EG.esc(EG.num(x.cantidad)) + (x.unidad ? ' ' + EG.esc(x.unidad) : '') + '</td><td class="n">' + EG.pesos(x.precio_unitario) + '</td><td class="n">' + EG.pesos(x.total) + '</td></tr>';
     };
     var tabla = function (l, chk) { return '<table class="items"><thead><tr><th>Detalle</th><th class="n">Cant.</th><th class="n">Unitario</th><th class="n">Total</th></tr></thead><tbody>' + l.map(function (x) { return fila(x, chk); }).join('') + '</tbody></table>'; };
     var tot = (p.totales || {}).necesario || { neto: 0, iva: 0, total: 0 };
@@ -59,7 +60,9 @@
       (nec.length ? '<h3>Trabajo necesario</h3>' + tabla(nec, false) : '') +
       '<table class="tot"><tr><td>Neto</td><td class="n">' + EG.pesos(tot.neto) + '</td></tr><tr><td>IVA ' + EG.esc(iva) + ' %</td><td class="n">' + EG.pesos(tot.iva) + '</td></tr><tr class="g"><td>Total</td><td class="n">' + EG.pesos(tot.total) + '</td></tr></table>' +
       (opc.length ? '<h3>Recomendado (opcional)</h3>' + (p.puede_responder ? '<p class="muted">Marca lo que quieres que incluyamos.</p>' : '') + tabla(opc, p.puede_responder) +
-        '<table class="tot"><tr class="g"><td>Total con lo opcional elegido</td><td class="n" id="' + pre + '-totopc">' + EG.pesos(tot.total) + '</td></tr></table>' : '') +
+        (p.estado === 'Autorizado' && p.totales && p.totales.aceptado
+          ? '<table class="tot"><tr><td>Neto autorizado</td><td class="n">' + EG.pesos(p.totales.aceptado.neto) + '</td></tr><tr><td>IVA ' + EG.esc(iva) + ' %</td><td class="n">' + EG.pesos(p.totales.aceptado.iva) + '</td></tr><tr class="g"><td>Total autorizado (con lo opcional incluido)</td><td class="n">' + EG.pesos(p.totales.aceptado.total) + '</td></tr></table>'
+          : '<table class="tot"><tr class="g"><td>Total con lo opcional elegido</td><td class="n" id="' + pre + '-totopc">' + EG.pesos(tot.total) + '</td></tr></table>') : '') +
       (p.condiciones ? '<h3>Condiciones</h3><pre>' + EG.esc(p.condiciones) + '</pre>' : '') +
       EG.cobroHtml(p.cobro) +
       '<p class="noprint"><button type="button" class="btn ghost" data-imprimir>Imprimir o guardar PDF</button></p>';
@@ -82,7 +85,8 @@
     var chks = raiz.querySelectorAll('.' + pre + '-opc');
     var recalcular = function () {
       var extraNeto = 0; Array.prototype.forEach.call(chks, function (c) { if (c.checked) extraNeto += Number(c.getAttribute('data-t')) || 0; });
-      var el = raiz.querySelector('#' + pre + '-totopc'); if (el) el.textContent = EG.pesos(tot + extraNeto + Math.round(extraNeto * iva / 100));
+      var neto = (((p.totales || {}).necesario || {}).neto || 0) + extraNeto;
+      var el = raiz.querySelector('#' + pre + '-totopc'); if (el) el.textContent = EG.pesos(neto + Math.round(neto * iva / 100));
     };
     Array.prototype.forEach.call(chks, function (c) { c.addEventListener('change', recalcular); });
     var f = raiz.querySelector('#' + pre + '-form'); if (!f) return;
