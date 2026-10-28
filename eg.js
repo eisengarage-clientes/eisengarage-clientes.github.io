@@ -23,7 +23,7 @@
   EG.historialHtml = function (d) {
     var h = '';
     (d.trabajos || []).forEach(function (t) {
-      h += '<div class="card trab"><div class="meta">' + EG.esc(EG.fecha(t.fecha)) + (t.tipo ? ' · ' + EG.esc(t.tipo) : '') + (t.km ? ' <span>· ' + EG.esc(Number(t.km).toLocaleString('es-CL')) + ' km</span>' : '') + (t.horas ? ' <span>· ' + EG.esc(t.horas) + ' h</span>' : '') + '</div><pre>' + EG.esc(t.resumen) + '</pre></div>';
+      h += '<div class="card trab"><div class="meta">' + EG.esc(t.aprox ? 'aprox. ' + String(t.fecha || '').slice(0, 4) : EG.fecha(t.fecha)) + (t.tipo ? ' · ' + EG.esc(t.tipo) : '') + (t.km ? ' <span>· ' + EG.esc(Number(t.km).toLocaleString('es-CL')) + ' km</span>' : '') + (t.horas ? ' <span>· ' + EG.esc(t.horas) + ' h</span>' : '') + '</div><pre>' + EG.esc(t.resumen) + '</pre></div>';
     });
     return h || '<p class="muted">Todavía no hay trabajos publicados.</p>';
   };
