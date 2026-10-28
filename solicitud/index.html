@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="referrer" content="no-referrer">
+<meta name="robots" content="noindex, nofollow">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'unsafe-inline' https://challenges.cloudflare.com; frame-src https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline'; connect-src https://script.google.com https://script.googleusercontent.com; img-src 'self' data:; base-uri 'none'; form-action 'none'">
+<title>Pedir un trabajo · Eisen Garage</title>
+<link rel="stylesheet" href="../eg.css">
+</head>
+<body>
+<header><div class="in"><b>EISEN GARAGE</b><span>Mecánica · diagnóstico computacional · electricidad automotriz · Peumo</span></div></header>
+<main id="main">
+<form class="card" id="sol">
+  <h1>Pedir un trabajo o presupuesto</h1>
+  <p class="muted">Cuéntanos qué necesitas y te contactamos. Para algo urgente, escríbenos por WhatsApp.</p>
+  <label class="f"><span>Tu nombre *</span><input name="nombre" maxlength="80" autocomplete="name"></label>
+  <label class="f"><span>Teléfono (WhatsApp) *</span><input name="telefono" maxlength="20" inputmode="tel" autocomplete="tel" placeholder="+56 9 1234 5678"></label>
+  <label class="f"><span>Correo (opcional)</span><input name="correo" maxlength="120" type="email" autocomplete="email"></label>
+  <label class="f"><span>Vehículo o equipo</span><input name="vehiculo" maxlength="120" placeholder="Marca, modelo, año y patente"></label>
+  <label class="f"><span>¿Qué necesitas? *</span><select name="tipo"><option value="">Elegir…</option><option>Mantención</option><option>Falla</option><option>Diagnóstico</option><option>Presupuesto</option><option>Otro</option></select></label>
+  <label class="f"><span>Cuéntanos *</span><textarea name="mensaje" maxlength="1000" rows="4" placeholder="Qué pasa, desde cuándo, km u horas"></textarea></label>
+  <label class="f"><span>¿Cómo prefieres que te contactemos?</span><select name="contacto"><option>WhatsApp</option><option>Llamada</option><option>Correo</option></select></label>
+  <label class="chk"><input type="checkbox" name="acepta"> <span>Acepto que Eisen Garage SpA use estos datos para responder mi solicitud, según su <a href="../privacidad/">política de privacidad</a>. *</span></label>
+  <div id="ts" style="margin:12px 0"></div>
+  <button class="btn go" type="submit">Enviar solicitud</button>
+  <div class="msg" role="status"></div>
+</form>
+</main>
+<footer><p>Eisen Garage SpA · RUT 78.417.312-7 · Gulutren 022, Peumo · <a href="mailto:eisengarage@gmail.com">eisengarage@gmail.com</a>. Tus datos se guardan en servicios de Google (EE.UU.) y se borran pasado el plazo indicado en la política de privacidad.</p></footer>
+<script src="../eg.js"></script>
+<script>
+/* Clave del sitio de Cloudflare Turnstile (pública). Mientras esté vacía, el formulario avisa que aún no está habilitado. */
+var TURNSTILE_SITE_KEY = '';
+(function(){
+  var f = document.getElementById('sol'), msg = f.querySelector('.msg'), btn = f.querySelector('button'), token = '', clave = EG.clave();
+  if (!TURNSTILE_SITE_KEY) {
+    f.innerHTML = '<h1>Pedir un trabajo o presupuesto</h1><div class="aviso">El formulario estará disponible pronto. Mientras tanto, escríbenos por WhatsApp o a <a href="mailto:eisengarage@gmail.com">eisengarage@gmail.com</a>.</div>';
+    return;
+  }
+  window.egTurnstileOk = function(t){ token = t; };
+  window.egTurnstileExp = function(){ token = ''; };
+  window.egTurnstileCarga = function(){ turnstile.render('#ts', { sitekey: TURNSTILE_SITE_KEY, callback: 'egTurnstileOk', 'expired-callback': 'egTurnstileExp', language: 'es' }); };
+  var s = document.createElement('script'); s.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js?onload=egTurnstileCarga&render=explicit'; s.async = true; document.head.appendChild(s);
+  f.addEventListener('submit', function(ev){
+    ev.preventDefault();
+    if (f.nombre.value.trim().length < 2) { msg.textContent = 'Escribe tu nombre.'; return; }
+    if (f.telefono.value.replace(/\D/g, '').length < 8) { msg.textContent = 'Escribe un teléfono válido.'; return; }
+    if (!f.tipo.value) { msg.textContent = 'Elige qué necesitas.'; return; }
+    if (f.mensaje.value.trim().length < 3) { msg.textContent = 'Cuéntanos qué necesitas.'; return; }
+    if (!f.acepta.checked) { msg.textContent = 'Para enviar, acepta el uso de tus datos.'; return; }
+    if (!token) { msg.textContent = 'Espera la verificación anti-robots (abajo) y vuelve a enviar.'; return; }
+    btn.disabled = true; msg.textContent = 'Enviando…';
+    EG.post({ accion: 'solicitar', tipo: f.tipo.value, nombre: f.nombre.value.trim(), telefono: f.telefono.value.trim(), correo: f.correo.value.trim(), vehiculo: f.vehiculo.value.trim(), mensaje: f.mensaje.value.trim(), contacto: f.contacto.value, acepta: true, token: token, clave: clave }).then(function(res){
+      if (res.ok) { f.innerHTML = '<h1>¡Gracias!</h1><div class="aviso ok">Recibimos tu solicitud. Te contactaremos pronto.</div>'; return; }
+      btn.disabled = false; msg.textContent = (res.error && res.error.message) || 'No se pudo enviar.';
+      if (window.turnstile) { turnstile.reset('#ts'); token = ''; }
+    });
+  });
+})();
+</script>
+</body>
+</html>
