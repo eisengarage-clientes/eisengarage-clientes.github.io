@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="referrer" content="no-referrer">
+<meta name="robots" content="noindex, nofollow">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; connect-src https://script.google.com https://script.googleusercontent.com; img-src 'self' data:; base-uri 'none'; form-action 'none'">
+<title>Presupuesto · Eisen Garage</title>
+<link rel="stylesheet" href="../eg.css">
+</head>
+<body>
+<header><div class="in"><b>EISEN GARAGE</b><span>Presupuesto</span></div></header>
+<main id="main"><div class="card estado">Cargando…</div></main>
+<footer><p><b>Tus datos.</b> Eisen Garage SpA (RUT 78.417.312-7, Gulutren 022, Peumo) usa tu respuesta solo para gestionar este trabajo. Se guarda en servicios de Google (EE.UU.). Consultas a <a href="mailto:eisengarage@gmail.com">eisengarage@gmail.com</a>. <a href="../privacidad/">Política de privacidad</a>.</p></footer>
+<script src="../eg.js"></script>
+<script>
+(function(){
+  var main = document.getElementById('main'), k = EG.codigo();
+  if (!k) { EG.estado(main, 'Este enlace está incompleto. Ábrelo tal como te llegó o pide uno nuevo a Eisen Garage.'); return; }
+  EG.post({ accion: 'presupuesto', k: k }).then(function(r){
+    if (!r.ok) { EG.estado(main, EG.esc(r.error && r.error.message || 'Este enlace no está disponible.')); return; }
+    main.innerHTML = EG.presupuestoHtml(r.data, k, 0);
+    EG.activarPresupuesto(main, r.data, k, 0);
+  });
+})();
+</script>
+</body>
+</html>
