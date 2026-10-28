@@ -39,9 +39,9 @@ var TURNSTILE_SITE_KEY = '0x4AAAAAAFpf_QfOKQa6JtIs';
     f.innerHTML = '<h1>Pedir un trabajo o presupuesto</h1><div class="aviso">El formulario estará disponible pronto. Mientras tanto, escríbenos por WhatsApp o a <a href="mailto:eisengarage@gmail.com">eisengarage@gmail.com</a>.</div>';
     return;
   }
-  window.egTurnstileOk = function(t){ token = t; };
-  window.egTurnstileExp = function(){ token = ''; };
-  window.egTurnstileCarga = function(){ turnstile.render('#ts', { sitekey: TURNSTILE_SITE_KEY, callback: 'egTurnstileOk', 'expired-callback': 'egTurnstileExp', language: 'es' }); };
+  var widget = null;
+  // En render explícito, Cloudflare necesita las funciones mismas (no su nombre).
+  window.egTurnstileCarga = function(){ widget = turnstile.render('#ts', { sitekey: TURNSTILE_SITE_KEY, callback: function(t){ token = t; }, 'expired-callback': function(){ token = ''; }, 'error-callback': function(){ token = ''; }, language: 'es' }); };
   var s = document.createElement('script'); s.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js?onload=egTurnstileCarga&render=explicit'; s.async = true; document.head.appendChild(s);
   f.addEventListener('submit', function(ev){
     ev.preventDefault();
@@ -50,12 +50,13 @@ var TURNSTILE_SITE_KEY = '0x4AAAAAAFpf_QfOKQa6JtIs';
     if (!f.tipo.value) { msg.textContent = 'Elige qué necesitas.'; return; }
     if (f.mensaje.value.trim().length < 3) { msg.textContent = 'Cuéntanos qué necesitas.'; return; }
     if (!f.acepta.checked) { msg.textContent = 'Para enviar, acepta el uso de tus datos.'; return; }
+    if (!token && window.turnstile && widget !== null) token = turnstile.getResponse(widget) || '';
     if (!token) { msg.textContent = 'Espera la verificación anti-robots (abajo) y vuelve a enviar.'; return; }
     btn.disabled = true; msg.textContent = 'Enviando…';
     EG.post({ accion: 'solicitar', tipo: f.tipo.value, nombre: f.nombre.value.trim(), telefono: f.telefono.value.trim(), correo: f.correo.value.trim(), vehiculo: f.vehiculo.value.trim(), mensaje: f.mensaje.value.trim(), contacto: f.contacto.value, acepta: true, token: token, clave: clave }).then(function(res){
       if (res.ok) { f.innerHTML = '<h1>¡Gracias!</h1><div class="aviso ok">Recibimos tu solicitud. Te contactaremos pronto.</div>'; return; }
       btn.disabled = false; msg.textContent = (res.error && res.error.message) || 'No se pudo enviar.';
-      if (window.turnstile) { turnstile.reset('#ts'); token = ''; }
+      if (window.turnstile && widget !== null) { turnstile.reset(widget); token = ''; }
     });
   });
 })();
