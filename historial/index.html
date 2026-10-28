@@ -58,7 +58,7 @@ footer a{color:var(--asfalto)}
         '<div><h1>' + esc(titulo) + '</h1><div class="muted">' + (d.trabajos || []).length + ' trabajo' + ((d.trabajos || []).length === 1 ? '' : 's') + ' registrado' + ((d.trabajos || []).length === 1 ? '' : 's') + (d.actualizado ? ' · actualizado el ' + esc(fecha(d.actualizado)) : '') + '</div></div></div>';
       h += '<h2>Trabajos realizados</h2>';
       (d.trabajos || []).forEach(function(t){
-        h += '<div class="card trab"><div class="meta">' + esc(fecha(t.fecha)) + (t.tipo ? ' · ' + esc(t.tipo) : '') + (t.km ? ' <span>· ' + esc(km(t.km)) + '</span>' : '') + (t.horas ? ' <span>· ' + esc(t.horas) + ' h</span>' : '') + '</div><pre>' + esc(t.resumen) + '</pre></div>';
+        h += '<div class="card trab"><div class="meta">' + esc(t.aprox ? 'aprox. ' + String(t.fecha || '').slice(0, 4) : fecha(t.fecha)) + (t.tipo ? ' · ' + esc(t.tipo) : '') + (t.km ? ' <span>· ' + esc(km(t.km)) + '</span>' : '') + (t.horas ? ' <span>· ' + esc(t.horas) + ' h</span>' : '') + '</div><pre>' + esc(t.resumen) + '</pre></div>';
       });
       var tl = d.taller || {};
       h += '<p class="muted">' + esc(tl.nombre || 'Eisen Garage SpA') + (tl.direccion ? ' · ' + esc(tl.direccion) : '') + '</p>';
