@@ -36,8 +36,8 @@ footer a{color:var(--asfalto)}
 <header><div class="in"><b>EISEN GARAGE</b><span>Historial técnico del vehículo</span></div></header>
 <main id="main"><div class="card estado" id="estado">Cargando…</div></main>
 <footer>
-  <p><b>Tus datos.</b> Este historial lo publica Eisen Garage SpA (RUT 78.417.312-7, Gulutren 022, Peumo) con autorización del propietario del vehículo. No contiene nombre, teléfono ni montos. Se guarda en servicios de Google (EE.UU.). Para pedir que se corrija o se retire, escribe a <a href="mailto:eisengarage@gmail.com">eisengarage@gmail.com</a>. <a href="../privacidad/">Política de privacidad</a>.</p>
-  <p>Guarda este enlace para consultarlo cuando quieras; siempre muestra la última versión publicada.</p>
+  <p><b>Tus datos.</b> Este historial lo publica Eisen Garage SpA (RUT 78.417.312-7, Gulutren 022, Peumo) con autorización del propietario del vehículo. No contiene nombre, teléfono ni montos, y la patente se muestra en parte. El enlace funciona por un plazo y después se retira. Se guarda en servicios de Google (EE.UU.). Para pedir que se corrija o se retire, escribe a <a href="mailto:eisengarage@gmail.com">eisengarage@gmail.com</a>. <a href="../privacidad/">Política de privacidad</a>.</p>
+  <p>Mientras el enlace esté vigente, siempre muestra la última versión publicada.</p>
 </footer>
 <script>
 (function(){
@@ -55,7 +55,7 @@ footer a{color:var(--asfalto)}
       var d = r.data, v = d.vehiculo || {};
       var titulo = [v.marca, v.modelo, v.anio].filter(Boolean).join(' ') || v.nombre || 'Vehículo';
       var h = '<div class="card veh">' + (v.patente ? '<span class="plate"><small>CHILE</small><b>' + esc(String(v.patente).toUpperCase()) + '</b></span>' : '') +
-        '<div><h1>' + esc(titulo) + '</h1><div class="muted">' + (d.trabajos || []).length + ' trabajo' + ((d.trabajos || []).length === 1 ? '' : 's') + ' registrado' + ((d.trabajos || []).length === 1 ? '' : 's') + (d.actualizado ? ' · actualizado el ' + esc(fecha(d.actualizado)) : '') + '</div></div></div>';
+        '<div><h1>' + esc(titulo) + '</h1><div class="muted">' + (d.trabajos || []).length + ' trabajo' + ((d.trabajos || []).length === 1 ? '' : 's') + ' registrado' + ((d.trabajos || []).length === 1 ? '' : 's') + (d.actualizado ? ' · actualizado el ' + esc(fecha(d.actualizado)) : '') + '</div>' + (d.vence ? '<div class="muted">Este enlace funciona hasta el ' + esc(fecha(d.vence)) + '.</div>' : '') + '</div></div>';
       h += '<h2>Trabajos realizados</h2>';
       (d.trabajos || []).forEach(function(t){
         h += '<div class="card trab"><div class="meta">' + esc(t.aprox ? 'aprox. ' + String(t.fecha || '').slice(0, 4) : fecha(t.fecha)) + (t.tipo ? ' · ' + esc(t.tipo) : '') + (t.km ? ' <span>· ' + esc(km(t.km)) + '</span>' : '') + (t.horas ? ' <span>· ' + esc(t.horas) + ' h</span>' : '') + '</div><pre>' + esc(t.resumen) + '</pre></div>';
