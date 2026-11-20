@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="referrer" content="no-referrer">
+<meta name="robots" content="noindex, nofollow">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; connect-src https://script.google.com https://script.googleusercontent.com; img-src 'self' data:; base-uri 'none'; form-action 'none'">
+<title>Mantención del vehículo · Eisen Garage</title>
+<link rel="stylesheet" href="../eg.css">
+</head>
+<body>
+<header><div class="in"><b>EISEN GARAGE</b><span>Resumen de mantención</span></div></header>
+<main id="main"><div class="card estado">Cargando…</div></main>
+<footer>
+  <p><b>Tus datos.</b> Este resumen lo publica Eisen Garage SpA (RUT 78.417.312-7, Gulutren 022, Peumo) con autorización del propietario del vehículo. Solo muestra fechas y kilómetros de la mantención básica: no contiene nombre, teléfono ni montos, y la patente se muestra en parte. Se guarda en servicios de Google (EE.UU.). Para pedir que se corrija o se retire, escribe a <a href="mailto:eisengarage@gmail.com">eisengarage@gmail.com</a>. <a href="../privacidad/">Política de privacidad</a>.</p>
+  <p>Guarda este enlace: se actualiza solo con cada mantención que hacemos.</p>
+</footer>
+<script src="../eg.js"></script>
+<script>
+(function(){
+  var main = document.getElementById('main'), k = EG.codigo(), E = EG.esc;
+  if (!k) { EG.estado(main, 'Este enlace está incompleto. Ábrelo tal como te llegó o pide uno nuevo a Eisen Garage.'); return; }
+  EG.post({ accion: 'mantencion', k: k }).then(function(r){
+    if (!r.ok) { EG.estado(main, E(r.error && r.error.message || 'Este enlace no está disponible.')); return; }
+    var d = r.data, v = d.vehiculo || {};
+    var h = '<div class="card veh">' + EG.patente(v.patente) + '<div><h1>' + E(EG.vehiculo(v) || 'Vehículo') + '</h1>' + (d.actualizado ? '<div class="muted">Actualizado el ' + E(EG.fecha(d.actualizado)) + '</div>' : '') + '</div></div>';
+    h += EG.mantencionHtml(d);
+    var tl = d.taller || {};
+    h += '<p class="muted">' + E(tl.nombre || 'Eisen Garage SpA') + (tl.direccion ? ' · ' + E(tl.direccion) : '') + '</p>';
+    main.innerHTML = h;
+  });
+})();
+</script>
+</body>
+</html>
