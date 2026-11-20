@@ -46,8 +46,9 @@
     if (eqs.length) {
       h += '<div class="sec">Tus vehículos y equipos</div>';
       eqs.forEach(function(e){
-        var hh = hist[e.id], n = hh ? (hh.trabajos || []).length : 0, titulo = [e.marca, e.modelo, e.anio].filter(Boolean).join(' ') || e.nombre;
-        h += n ? '<details><summary>' + EG.patente(e.patente) + '<span><b>' + E(e.nombre || titulo) + '</b><br><span class="muted">' + n + ' trabajo' + (n === 1 ? '' : 's') + ' en el historial</span></span></summary><div class="in">' + EG.historialHtml(hh) + '</div></details>'
+        var hh = hist[e.id], n = hh ? (hh.trabajos || []).length : 0, mm = (d.mantenciones || {})[e.id], titulo = [e.marca, e.modelo, e.anio].filter(Boolean).join(' ') || e.nombre;
+        var sub = [mm ? 'resumen de mantención' : '', n ? n + ' trabajo' + (n === 1 ? '' : 's') + ' en el historial' : ''].filter(Boolean).join(' · ');
+        h += (n || mm) ? '<details><summary>' + EG.patente(e.patente) + '<span><b>' + E(e.nombre || titulo) + '</b><br><span class="muted">' + E(sub) + '</span></span></summary><div class="in">' + (mm ? '<h3>Mantención</h3>' + EG.mantencionHtml(mm) : '') + (n ? (mm ? '<h3>Trabajos</h3>' : '') + EG.historialHtml(hh) : '') + '</div></details>'
           : '<div class="card veh">' + EG.patente(e.patente) + '<div><b>' + E(e.nombre || titulo) + '</b><div class="muted">Sin historial publicado.</div></div></div>';
       });
     }
