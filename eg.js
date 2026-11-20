@@ -28,6 +28,17 @@
     return h || '<p class="muted">Todavía no hay trabajos publicados.</p>';
   };
 
+  /* ── 1.20: resumen de mantención (A5): último cambio de cada ítem y próxima mantención ── */
+  EG.mantencionHtml = function (d) {
+    var km = function (n) { return n == null || n === '' ? '' : Number(n).toLocaleString('es-CL') + ' km'; };
+    var cuando = function (x) { return [x.aprox ? 'aprox. ' + String(x.fecha || '').slice(0, 4) : EG.fecha(x.fecha), km(x.km)].filter(Boolean).join(' · '); };
+    var h = '';
+    if ((d.proximas || []).length) h += '<div class="card"><b>Próxima mantención</b>' + d.proximas.map(function (p) { return '<div class="fila"><span>' + EG.esc(p.item) + '</span><span class="muted">' + EG.esc([km(p.km), EG.fecha(p.fecha)].filter(Boolean).join(' o ')) + '</span></div>'; }).join('') + '</div>';
+    if ((d.items || []).length) h += '<div class="card"><b>Último cambio</b>' + d.items.map(function (x) { return '<div class="fila"><span>' + EG.esc(x.item) + '</span><span class="muted">' + EG.esc(cuando(x)) + '</span></div>'; }).join('') + '</div>';
+    if (d.ultimo) h += '<p class="muted">Último km registrado en el taller: ' + EG.esc(km(d.ultimo.km)) + ' (' + EG.esc(EG.fecha(d.ultimo.fecha)) + ').</p>';
+    return h || '<p class="muted">Todavía no hay datos de mantención.</p>';
+  };
+
   /* ── Medios de pago ── */
   EG.cobroHtml = function (l) {
     if (!l || !l.length) return '';
