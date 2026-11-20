@@ -20,6 +20,8 @@ h3{font-size:16px;margin:18px 0 8px}
 pre{margin:0;white-space:pre-wrap;word-wrap:break-word;font:inherit}
 .trab .meta{font-weight:600;margin-bottom:6px}
 .trab .meta span{color:var(--acero);font-weight:400}
+.fila{display:flex;justify-content:space-between;gap:12px;padding:7px 0;border-bottom:1px solid var(--linea)}
+.fila:last-child{border-bottom:0}
 .sec{font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--acero);margin:22px 0 8px}
 table{width:100%;border-collapse:collapse}
 .items td,.items th{padding:7px 4px;border-bottom:1px solid var(--linea);vertical-align:top;text-align:left;font-size:15px}
